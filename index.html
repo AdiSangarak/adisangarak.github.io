@@ -2,72 +2,38 @@
 <html>
 <head>
     <title>PDF Annotation Example</title>
-    <link rel="stylesheet" type="text/css" href="index.css">
-    <style>
-        /* Additional CSS for button styling */
-        .annotation-buttons {
-            position: absolute;
-            top: 0;
-            right: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 50px;
-        }
-
-        .annotation-button {
-            height: 40px;
-            width: 40px;
-            margin: 10px;
-            font-size: 18px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            color: #333;
-        }
-
-        .annotation-button:hover {
-            color: red; /* Change color on hover */
-        }
-    </style>
 </head>
 <body>
     <h1>PDF Annotation Example</h1>
 
     <!-- Display the PDF using pdf.js -->
-    <canvas id="pdf-canvas" width="400" height="600"></canvas>
+    <canvas id="pdf-canvas" width="600" height="800"></canvas>
 
     <!-- UI for adding comments -->
     <input type="text" id="comment-input" placeholder="Add a comment">
     <button id="add-comment-button">Add Comment</button>
 
-    <!-- Annotation buttons -->
-    <div class="annotation-buttons">
-        <button class="annotation-button" id="okay-button">&#10003;</button>
-        <span>Okay</span>
-        <button class="annotation-button" id="not-okay-button">&#10060;</button>
-        <span>Not Okay</span>
-    </div>
-
     <!-- Display the modified PDF using pdf.js -->
     <canvas id="modified-pdf-canvas" width="600" height="800"></canvas>
 
-    <a id="downloadAnchorElem" style="display:none"></a>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js"></script>
     <script>
         async function main() {
             const pdfUrl = './example.pdf'; // Replace with your PDF file path
+
             const canvas = document.getElementById('pdf-canvas');
             const context = canvas.getContext('2d');
+
             const commentInput = document.getElementById('comment-input');
             const addButton = document.getElementById('add-comment-button');
+
             const comments = [];
-            
+
             // Display the original PDF using pdf.js
             const pdfData = await fetch(pdfUrl).then(response => response.arrayBuffer());
+
             pdfjsLib.getDocument(pdfData).promise.then(pdf => {
                 pdf.getPage(1).then(page => {
                     const viewport = page.getViewport({ scale: 1 });
@@ -77,27 +43,14 @@
                 });
             });
 
-            // Add event listeners for the Okay and Not Okay buttons
-            const okayButton = document.getElementById('okay-button');
-            const notOkayButton = document.getElementById('not-okay-button');
-
-            okayButton.addEventListener('click', () => {
-                // Handle Okay button click (e.g., display a tick on the canvas)
-                context.fillStyle = 'red';
-                context.font = '40px Arial';
-                context.fillText('✔', 300, 100); // Adjust coordinates as needed
-            });
-
-            notOkayButton.addEventListener('click', () => {
-                // Handle Not Okay button click (e.g., display a cross on the canvas)
-                context.fillStyle = 'red';
-                context.font = '40px Arial';
-                context.fillText('✖', 300, 200); // Adjust coordinates as needed
-            });
-
             addButton.addEventListener('click', async () => {
                 const commentText = commentInput.value;
                 comments.push(commentText);
+
+                // Display the comment on the canvas (adjust coordinates as needed)
+                context.fillStyle = 'red';
+                context.font = '14px Arial';
+                context.fillText(commentText, 100, 100);
 
                 // Add the comment to the PDF using pdf-lib
                 const pdfBytes = await fetch(pdfUrl).then(response => response.arrayBuffer());
@@ -117,12 +70,15 @@
 
                 // Open the modified PDF in a new tab
                 window.open(modifiedPdfUrl, '_blank');
-                
+
                 // Display the modified PDF using pdf.js
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
+
                 const modifiedPdfData = await fetch(modifiedPdfUrl).then(response => response.arrayBuffer());
+
                 const modifiedPdfCanvas = document.getElementById('modified-pdf-canvas');
                 const modifiedPdfContext = modifiedPdfCanvas.getContext('2d');
+
                 pdfjsLib.getDocument(modifiedPdfData).promise.then(pdf => {
                     pdf.getPage(1).then(page => {
                         const viewport = page.getViewport({ scale: 1 });
@@ -131,20 +87,6 @@
                         page.render({ canvasContext: modifiedPdfContext, viewport: viewport });
                     });
                 });
-                // Save comment to localStorage
-                const commentData = {
-                    text: commentText,
-                    x: 100,
-                    y: 100
-                };
-                localStorage.setItem('comments', JSON.stringify(commentData));
-
-                // Create a download link for comments.json
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(commentData));
-                const dlAnchorElem = document.getElementById('downloadAnchorElem');
-                dlAnchorElem.setAttribute("href", dataStr);
-                dlAnchorElem.setAttribute("download", "comments.json");
-                dlAnchorElem.click();
 
                 // Reset the comment input
                 commentInput.value = '';
@@ -153,7 +95,103 @@
 
         main();
     </script>
-
 </body>
+</html><!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Annotation Example</title>
+</head>
+<body>
+    <h1>PDF Annotation Example</h1>
 
+    <!-- Display the PDF using pdf.js -->
+    <canvas id="pdf-canvas" width="600" height="800"></canvas>
+
+    <!-- UI for adding comments -->
+    <input type="text" id="comment-input" placeholder="Add a comment">
+    <button id="add-comment-button">Add Comment</button>
+
+    <!-- Display the modified PDF using pdf.js -->
+    <canvas id="modified-pdf-canvas" width="600" height="800"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js"></script>
+    <script>
+        async function main() {
+            const pdfUrl = './example.pdf'; // Replace with your PDF file path
+
+            const canvas = document.getElementById('pdf-canvas');
+            const context = canvas.getContext('2d');
+
+            const commentInput = document.getElementById('comment-input');
+            const addButton = document.getElementById('add-comment-button');
+
+            const comments = [];
+
+            // Display the original PDF using pdf.js
+            const pdfData = await fetch(pdfUrl).then(response => response.arrayBuffer());
+
+            pdfjsLib.getDocument(pdfData).promise.then(pdf => {
+                pdf.getPage(1).then(page => {
+                    const viewport = page.getViewport({ scale: 1 });
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    page.render({ canvasContext: context, viewport: viewport });
+                });
+            });
+
+            addButton.addEventListener('click', async () => {
+                const commentText = commentInput.value;
+                comments.push(commentText);
+
+                // Display the comment on the canvas (adjust coordinates as needed)
+                context.fillStyle = 'red';
+                context.font = '14px Arial';
+                context.fillText(commentText, 100, 100);
+
+                // Add the comment to the PDF using pdf-lib
+                const pdfBytes = await fetch(pdfUrl).then(response => response.arrayBuffer());
+                const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                const helveticaFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                const pages = pdfDoc.getPages();
+                const firstPage = pages[0];
+                const x = 50; // Adjust x-coordinate
+                const y = 50; // Adjust y-coordinate
+                const fontSize = 12;
+                firstPage.drawText(commentText, { x, y, size: fontSize, font: helveticaFont });
+
+                // Save the modified PDF
+                const modifiedPdfBytes = await pdfDoc.save();
+                const modifiedPdfBlob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+                const modifiedPdfUrl = URL.createObjectURL(modifiedPdfBlob);
+
+                // Open the modified PDF in a new tab
+                window.open(modifiedPdfUrl, '_blank');
+
+                // Display the modified PDF using pdf.js
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
+
+                const modifiedPdfData = await fetch(modifiedPdfUrl).then(response => response.arrayBuffer());
+
+                const modifiedPdfCanvas = document.getElementById('modified-pdf-canvas');
+                const modifiedPdfContext = modifiedPdfCanvas.getContext('2d');
+
+                pdfjsLib.getDocument(modifiedPdfData).promise.then(pdf => {
+                    pdf.getPage(1).then(page => {
+                        const viewport = page.getViewport({ scale: 1 });
+                        modifiedPdfCanvas.width = viewport.width;
+                        modifiedPdfCanvas.height = viewport.height;
+                        page.render({ canvasContext: modifiedPdfContext, viewport: viewport });
+                    });
+                });
+
+                // Reset the comment input
+                commentInput.value = '';
+            });
+        }
+
+        main();
+    </script>
+</body>
 </html>
